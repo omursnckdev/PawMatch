@@ -1,0 +1,32 @@
+# Xcode / build
+DerivedData/
+build/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+.build/
+
+# Secrets — never commit real keys or Firebase config
+Secrets.xcconfig
+PawMatch/GoogleService-Info.plist
+GoogleServiceInfo-*.plist
+.firebaserc
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Node (Cloud Functions)
+CloudFunctions/node_modules/
+CloudFunctions/lib/
+CloudFunctions/.env
+
+# macOS
+.DS_Store

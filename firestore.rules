@@ -1,0 +1,85 @@
+rules_version = '2';
+
+// See CLAUDE.md §6.3. These rules assume Firebase App Check is also enforced
+// on Firestore (configured in the Firebase console, not here) — App Check and
+// these ownership checks are complementary, not substitutes for each other.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function userDoc(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    function otherParticipant(userIds, uid) {
+      return userIds[0] == uid ? userIds[1] : userIds[0];
+    }
+
+    // users/{userId} — isPremium and billingIssue are server-write-only
+    // (set by the revenueCatWebhook Cloud Function via the Admin SDK, which
+    // bypasses these rules entirely). Client writes must never change them.
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId)
+        && request.resource.data.isPremium == false
+        && request.resource.data.billingIssue == false;
+      allow update: if isOwner(userId)
+        && request.resource.data.isPremium == resource.data.isPremium
+        && request.resource.data.billingIssue == resource.data.billingIssue;
+      allow delete: if false; // account deletion is handled server-side (Milestone 6)
+    }
+
+    // pets/{petId} — readable by any authenticated user, writable only by owner.
+    match /pets/{petId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // swipes/{swipeId} — creatable only by the swiper, never updatable; a
+    // blocked relationship (either direction) blocks the write server-side too,
+    // not just via client-side deck filtering.
+    match /swipes/{swipeId} {
+      allow read: if isSignedIn()
+        && (resource.data.swiperUserId == request.auth.uid || resource.data.targetOwnerId == request.auth.uid);
+      allow create: if isSignedIn()
+        && request.resource.data.swiperUserId == request.auth.uid
+        && !(request.resource.data.targetOwnerId in userDoc(request.auth.uid).blockedUserIds)
+        && !(request.auth.uid in userDoc(request.resource.data.targetOwnerId).blockedUserIds);
+      allow update, delete: if false;
+    }
+
+    // matches/{matchId} — written only by Cloud Functions (Admin SDK bypasses rules).
+    match /matches/{matchId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.userIds;
+      allow write: if false;
+    }
+
+    // chats/{matchId}/messages/{messageId} — readable/writable only by the two
+    // participants on the parent match, and only while neither has blocked the other.
+    match /chats/{matchId}/messages/{messageId} {
+      allow read: if isSignedIn()
+        && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.userIds;
+      allow create: if isSignedIn()
+        && request.resource.data.senderId == request.auth.uid
+        && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.userIds
+        && !(otherParticipant(get(/databases/$(database)/documents/matches/$(matchId)).data.userIds, request.auth.uid)
+              in userDoc(request.auth.uid).blockedUserIds)
+        && !(request.auth.uid in userDoc(
+              otherParticipant(get(/databases/$(database)/documents/matches/$(matchId)).data.userIds, request.auth.uid)
+            ).blockedUserIds);
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

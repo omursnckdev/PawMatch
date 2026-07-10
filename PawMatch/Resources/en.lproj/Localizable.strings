@@ -1,0 +1,18 @@
+/* Auth */
+"auth.signup.title" = "Create your account";
+"auth.login.title" = "Welcome back";
+"auth.subtitle" = "Find playdates and breeding matches for your pet.";
+"auth.signInWithApple" = "Sign in with Apple";
+"auth.or" = "or";
+"auth.email.placeholder" = "Email";
+"auth.password.placeholder" = "Password (min. 6 characters)";
+"auth.signUp.button" = "Sign Up";
+"auth.login.button" = "Log In";
+"auth.toggle.toLogin" = "Already have an account? Log in";
+"auth.toggle.toSignUp" = "New here? Sign up";
+
+/* Age confirmation */
+"age.title" = "Before you continue";
+"age.body" = "PawMatch connects pet owners for playdates and breeding matches. You must be 18 or older to use it.";
+"age.confirm" = "I confirm that I am 18 years of age or older.";
+"age.continue" = "Continue";
