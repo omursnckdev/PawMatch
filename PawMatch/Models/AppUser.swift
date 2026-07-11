@@ -12,6 +12,7 @@ struct AppUser: Codable, Identifiable, Equatable {
     var isPremium: Bool
     var billingIssue: Bool
     var dailySwipeCount: Int
+    var dailySuperlikeCount: Int
     var lastSwipeResetDate: Timestamp
     var fcmToken: String?
     var blockedUserIds: [String]

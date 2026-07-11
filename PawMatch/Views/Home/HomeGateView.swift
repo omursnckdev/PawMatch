@@ -21,7 +21,7 @@ struct HomeGateView: View {
                     onComplete: { _ in Task { await viewModel.load() } }
                 )
             case .ready(let pets):
-                ManagePetsView(
+                MainTabView(
                     pets: pets,
                     homeViewModel: viewModel,
                     onSignOut: { authViewModel.signOut() }

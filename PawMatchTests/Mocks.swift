@@ -62,6 +62,7 @@ final class MockUserService: UserServicing {
             isPremium: false,
             billingIssue: false,
             dailySwipeCount: 0,
+            dailySuperlikeCount: 0,
             lastSwipeResetDate: Timestamp(date: Date()),
             fcmToken: nil,
             blockedUserIds: [],
@@ -73,6 +74,12 @@ final class MockUserService: UserServicing {
     func confirmAge(uid: String) async throws {
         confirmAgeCallCount += 1
         storedUsers[uid]?.isAgeConfirmed = true
+    }
+
+    func updateSwipeCounters(uid: String, swipeCount: Int, superlikeCount: Int, lastResetDate: Date) async throws {
+        storedUsers[uid]?.dailySwipeCount = swipeCount
+        storedUsers[uid]?.dailySuperlikeCount = superlikeCount
+        storedUsers[uid]?.lastSwipeResetDate = Timestamp(date: lastResetDate)
     }
 }
 
@@ -163,7 +170,70 @@ final class MockGeohashService: GeohashServicing {
     }
 }
 
+final class MockDeckService: DeckServicing {
+    var candidates: [Pet] = []
+    var error: Error?
+    private(set) var fetchCallCount = 0
+
+    func fetchCandidates(
+        center: CLLocationCoordinate2D,
+        radiusMeters: Double,
+        species: Pet.Species,
+        purpose: Pet.Purpose?,
+        limitPerBound: Int
+    ) async throws -> [Pet] {
+        fetchCallCount += 1
+        if let error { throw error }
+        return candidates
+    }
+}
+
+final class MockSwipeService: SwipeServicing {
+    var swipedTargetPetIds: Set<String> = []
+    var incomingSuperlikerPetIds: Set<String> = []
+    var recordError: Error?
+    private(set) var recordedSwipes: [Swipe] = []
+
+    func recordSwipe(_ swipe: Swipe) async throws {
+        if let recordError { throw recordError }
+        recordedSwipes.append(swipe)
+    }
+
+    func fetchSwipedTargetPetIds(swiperUserId: String) async throws -> Set<String> {
+        swipedTargetPetIds
+    }
+
+    func fetchIncomingSuperlikerPetIds(targetPetId: String) async throws -> Set<String> {
+        incomingSuperlikerPetIds
+    }
+}
+
 enum TestFixtures {
+    static func user(
+        id: String = "owner-1",
+        isPremium: Bool = false,
+        dailySwipeCount: Int = 0,
+        dailySuperlikeCount: Int = 0,
+        lastResetDate: Date = Date(),
+        blockedUserIds: [String] = []
+    ) -> AppUser {
+        AppUser(
+            id: id,
+            displayName: "Owner",
+            email: "owner@example.com",
+            authProvider: .email,
+            isPremium: isPremium,
+            billingIssue: false,
+            dailySwipeCount: dailySwipeCount,
+            dailySuperlikeCount: dailySuperlikeCount,
+            lastSwipeResetDate: Timestamp(date: lastResetDate),
+            fcmToken: nil,
+            blockedUserIds: blockedUserIds,
+            isAgeConfirmed: true,
+            createdAt: Timestamp(date: Date(timeIntervalSince1970: 0))
+        )
+    }
+
     static func pet(
         id: String = "pet-1",
         ownerId: String = "owner-1",

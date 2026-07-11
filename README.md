@@ -5,8 +5,8 @@ spec, architecture, data model, and build plan live in [`CLAUDE.md`](./CLAUDE.md
 
 ## Status
 
-**Milestones 1–2 scaffolded** (Foundation & Auth; Pet Profiles). This was built
-in a Linux container with no Xcode/Swift toolchain available, so the code has
+**Milestones 1–3 scaffolded** (Foundation & Auth; Pet Profiles; Swipe Deck).
+This was built in a Linux container with no Xcode/Swift toolchain available, so the code has
 been written carefully against the Firebase/SwiftUI APIs but has **not been
 compiled or run** — the first thing to do on a Mac is open it in Xcode and fix
 whatever the compiler finds. Treat this as a strong first draft, not a verified
@@ -43,11 +43,32 @@ build.
 - Unit tests for `AuthViewModel`, `PetProfileViewModel`, and `HomeViewModel`
   against protocol-mocked services (no live Firebase calls).
 
-Not started: swipe deck, matching, chat, monetization, ads, report/block,
-delete account, App Store assets, Fastlane. Follow `CLAUDE.md` §12 for order.
+### Milestone 3 — Swipe Deck
+- `MainTabView` 5-tab shell (§4); Swipe and Profile tabs functional, Matches /
+  Chat / Likes are placeholders for Milestones 4–5.
+- `DeckService` geohash-proximity query via `GeoFireUtils` bounds, parallel
+  per-bound queries merged and filtered to the true radius (§6.1); deck excludes
+  the user's own pets, already-swiped pets, and blocked owners (§6.3).
+- `SwipeDeckView` card stack with drag-to-swipe (like/pass), a superlike button,
+  and button fallbacks; next card previewed underneath.
+- `DailySwipeCounter` (pure, fully unit-tested) enforces the 15/day free limit
+  with local-midnight reset (§7 item 6); premium bypasses. Superlikes have their
+  own daily cap. Hitting a limit presents the paywall instead of swiping.
+- `PaywallView` benefits screen with the purchase button disabled (real
+  RevenueCat purchase + subscription terms land in Milestone 5) — already logs
+  `paywall_viewed` / `paywall_dismissed`.
+- Incoming-superlike cards float to the top of the deck with the Superlike badge.
+- Unit tests for `DailySwipeCounter` and `SwipeDeckViewModel` (exclusions,
+  sorting, limit→paywall, midnight reset, premium bypass).
 
-> Note: the "add a second pet is Plus-gated" path currently shows a placeholder
-> note instead of a paywall — the real paywall is built in Milestone 5.
+Not started: matching, chat, push, monetization purchase flow, ads,
+report/block, delete account, App Store assets, Fastlane. Follow `CLAUDE.md`
+§12 for order.
+
+> Notes: the "add a second pet is Plus-gated" path and the Likes tab currently
+> show placeholder notes instead of the real paywall/purchase — those are built
+> in Milestone 5. AdMob native ad cards (every 10th card, free users) are also
+> Milestone 5.
 
 ## Getting started (on a Mac)
 

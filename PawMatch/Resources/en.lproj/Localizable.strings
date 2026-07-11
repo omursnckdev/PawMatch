@@ -72,3 +72,48 @@
 "managePets.deleteConfirm.message" = "This permanently removes the profile and its photos.";
 "managePets.empty" = "You haven't added a pet yet.";
 "error.generic" = "Something went wrong. Please try again.";
+
+/* Tabs */
+"tab.swipe" = "Swipe";
+"tab.matches" = "Matches";
+"tab.chat" = "Chat";
+"tab.likes" = "Likes";
+"tab.profile" = "Profile";
+
+/* Swipe deck */
+"deck.title" = "Discover";
+"deck.loading" = "Finding pets near you…";
+"deck.empty.title" = "No more pets nearby";
+"deck.empty.message" = "Check back later, or widen your search as more pets join PawMatch.";
+"deck.remaining" = "%d swipes left today";
+"deck.remaining.unlimited" = "Unlimited swipes";
+"deck.action.pass" = "Pass";
+"deck.action.superlike" = "Superlike";
+"deck.action.like" = "Like";
+
+/* Placeholder tabs (built in later milestones) */
+"placeholder.matches.title" = "Your matches will appear here";
+"placeholder.matches.message" = "When you and another owner both swipe right, you'll see the match here. (Coming in the next update.)";
+"placeholder.chat.title" = "Your conversations will appear here";
+"placeholder.chat.message" = "Chat with your matches in real time. (Coming in the next update.)";
+"placeholder.likes.title" = "See who liked your pet";
+"placeholder.likes.message" = "Knowing who already liked you is a PawMatch Plus feature.";
+
+/* Paywall */
+"paywall.title" = "PawMatch Plus";
+"paywall.headline.swipeLimit" = "You're out of swipes for today. Go unlimited with Plus.";
+"paywall.headline.superlikeLimit" = "You've used your Superlike for today. Get more with Plus.";
+"paywall.headline.secondPet" = "Add more than one pet with PawMatch Plus.";
+"paywall.headline.likesTab" = "See everyone who liked your pet with Plus.";
+"paywall.headline.rewind" = "Undo your last swipe with Plus.";
+"paywall.headline.boost" = "Get seen by more pets with a monthly Boost.";
+"paywall.benefit.unlimited" = "Unlimited swipes";
+"paywall.benefit.multiPet" = "Multiple pet profiles";
+"paywall.benefit.filters" = "Advanced filters: breed, age, purpose";
+"paywall.benefit.rewind" = "Rewind your last swipe";
+"paywall.benefit.whoLiked" = "See who liked you";
+"paywall.benefit.boost" = "1 monthly Boost";
+"paywall.benefit.noAds" = "No ads";
+"paywall.subscribe.comingSoon" = "Subscriptions coming soon";
+"paywall.maybeLater" = "Maybe later";
+"paywall.terms.placeholder" = "Pricing, auto-renewal, and cancellation terms are shown here once subscriptions are enabled.";

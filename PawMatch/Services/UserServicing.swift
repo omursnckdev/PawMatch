@@ -9,4 +9,8 @@ protocol UserServicing {
 
     /// Records the user's 18+ self-attestation.
     func confirmAge(uid: String) async throws
+
+    /// Persists the client-managed daily swipe counters (§7 item 6 — the daily
+    /// reset is handled client-side, not by a scheduled function).
+    func updateSwipeCounters(uid: String, swipeCount: Int, superlikeCount: Int, lastResetDate: Date) async throws
 }

@@ -32,6 +32,7 @@ final class UserService: UserServicing {
             isPremium: false,
             billingIssue: false,
             dailySwipeCount: 0,
+            dailySuperlikeCount: 0,
             lastSwipeResetDate: Timestamp(date: Date()),
             fcmToken: nil,
             blockedUserIds: [],
@@ -43,5 +44,13 @@ final class UserService: UserServicing {
 
     func confirmAge(uid: String) async throws {
         try await userDocument(uid).updateData(["isAgeConfirmed": true])
+    }
+
+    func updateSwipeCounters(uid: String, swipeCount: Int, superlikeCount: Int, lastResetDate: Date) async throws {
+        try await userDocument(uid).updateData([
+            "dailySwipeCount": swipeCount,
+            "dailySuperlikeCount": superlikeCount,
+            "lastSwipeResetDate": Timestamp(date: lastResetDate)
+        ])
     }
 }
