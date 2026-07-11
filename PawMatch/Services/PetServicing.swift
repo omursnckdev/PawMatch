@@ -6,6 +6,7 @@ protocol PetServicing {
     func newPetId() -> String
 
     func fetchPets(ownerId: String) async throws -> [Pet]
+    func fetchPet(petId: String) async throws -> Pet?
     func createPet(_ pet: Pet) async throws
     func updatePet(_ pet: Pet) async throws
     func deletePet(petId: String) async throws

@@ -81,6 +81,18 @@ final class MockUserService: UserServicing {
         storedUsers[uid]?.dailySuperlikeCount = superlikeCount
         storedUsers[uid]?.lastSwipeResetDate = Timestamp(date: lastResetDate)
     }
+
+    func setBlocked(uid: String, otherUserId: String, isBlocked: Bool) async throws {
+        var blocked = Set(storedUsers[uid]?.blockedUserIds ?? [])
+        if isBlocked { blocked.insert(otherUserId) } else { blocked.remove(otherUserId) }
+        storedUsers[uid]?.blockedUserIds = Array(blocked)
+    }
+
+    func setActiveChat(uid: String, matchId: String?) async throws {}
+
+    func updateFCMToken(uid: String, token: String) async throws {
+        storedUsers[uid]?.fcmToken = token
+    }
 }
 
 final class MockAnalyticsService: AnalyticsServicing {
@@ -112,6 +124,11 @@ final class MockPetService: PetServicing {
     func fetchPets(ownerId: String) async throws -> [Pet] {
         if let fetchError { throw fetchError }
         return pets.filter { $0.ownerId == ownerId }
+    }
+
+    func fetchPet(petId: String) async throws -> Pet? {
+        if let fetchError { throw fetchError }
+        return pets.first { $0.id == petId }
     }
 
     func createPet(_ pet: Pet) async throws {
@@ -208,6 +225,60 @@ final class MockSwipeService: SwipeServicing {
     }
 }
 
+final class MockMatchService: MatchServicing {
+    var matchesToEmit: [Match] = []
+
+    func observeMatches(userId: String) -> AsyncStream<[Match]> {
+        let matches = matchesToEmit
+        return AsyncStream { continuation in
+            continuation.yield(matches)
+            continuation.finish()
+        }
+    }
+
+    func fetchMatch(matchId: String) async throws -> Match? {
+        matchesToEmit.first { $0.id == matchId }
+    }
+}
+
+final class MockChatService: ChatServicing {
+    var messagesToEmit: [ChatMessage] = []
+    var sendError: Error?
+    private(set) var sentMessages: [(matchId: String, senderId: String, text: String)] = []
+    private(set) var markedReadIds: [String] = []
+
+    func observeMessages(matchId: String) -> AsyncStream<[ChatMessage]> {
+        let messages = messagesToEmit
+        return AsyncStream { continuation in
+            continuation.yield(messages)
+            continuation.finish()
+        }
+    }
+
+    func sendMessage(matchId: String, senderId: String, text: String) async throws {
+        if let sendError { throw sendError }
+        sentMessages.append((matchId, senderId, text))
+    }
+
+    func markMessagesRead(matchId: String, userId: String, messageIds: [String]) async throws {
+        markedReadIds.append(contentsOf: messageIds)
+    }
+}
+
+final class MockReportService: ReportServicing {
+    private(set) var reports: [(reported: String, reason: Report.Reason)] = []
+
+    func submitReport(
+        reporterUserId: String,
+        reportedUserId: String,
+        reportedPetId: String?,
+        reason: Report.Reason,
+        details: String?
+    ) async throws {
+        reports.append((reportedUserId, reason))
+    }
+}
+
 enum TestFixtures {
     static func user(
         id: String = "owner-1",
@@ -232,6 +303,31 @@ enum TestFixtures {
             isAgeConfirmed: true,
             createdAt: Timestamp(date: Date(timeIntervalSince1970: 0))
         )
+    }
+
+    static func match(
+        id: String = "petA_petB",
+        petIds: [String] = ["petA", "petB"],
+        userIds: [String] = ["owner-1", "owner-2"]
+    ) -> Match {
+        Match(
+            id: id,
+            petIds: petIds,
+            userIds: userIds,
+            purpose: .playdate,
+            matchedAt: Timestamp(date: Date()),
+            lastMessage: nil,
+            lastMessageAt: nil
+        )
+    }
+
+    static func message(
+        id: String = "m1",
+        senderId: String = "owner-2",
+        text: String = "Hi",
+        readBy: [String] = ["owner-2"]
+    ) -> ChatMessage {
+        ChatMessage(id: id, senderId: senderId, text: text, timestamp: Timestamp(date: Date()), readBy: readBy)
     }
 
     static func pet(

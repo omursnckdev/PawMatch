@@ -92,12 +92,46 @@
 "deck.action.like" = "Like";
 
 /* Placeholder tabs (built in later milestones) */
-"placeholder.matches.title" = "Your matches will appear here";
-"placeholder.matches.message" = "When you and another owner both swipe right, you'll see the match here. (Coming in the next update.)";
-"placeholder.chat.title" = "Your conversations will appear here";
-"placeholder.chat.message" = "Chat with your matches in real time. (Coming in the next update.)";
 "placeholder.likes.title" = "See who liked your pet";
 "placeholder.likes.message" = "Knowing who already liked you is a PawMatch Plus feature.";
+
+/* Matches & chat */
+"matches.title" = "Matches";
+"matches.loading" = "Loading matches…";
+"matches.empty.title" = "No matches yet";
+"matches.empty.message" = "Keep swiping! When you and another owner both swipe right, they'll show up here.";
+"chat.title" = "Chats";
+"chat.empty.title" = "No conversations yet";
+"chat.empty.message" = "Say hello to your matches — your conversations appear here.";
+"chat.noMessagesYet" = "You matched! Send the first message.";
+"chat.message.placeholder" = "Message…";
+"chat.blocked.banner" = "You can't message this user.";
+"chat.menu.block" = "Block user";
+"chat.menu.report" = "Report";
+"chat.block.confirm.title" = "Block this user?";
+"chat.block.confirm.message" = "They'll be removed from your matches and neither of you can message the other.";
+
+"match.modal.title" = "It's a Match!";
+"match.modal.subtitle" = "You and %@'s owner both swiped right.";
+"match.modal.sendMessage" = "Send a message";
+"match.modal.keepSwiping" = "Keep swiping";
+
+/* Report */
+"report.title" = "Report";
+"report.reason.header" = "Why are you reporting this?";
+"report.reason.spam" = "Spam";
+"report.reason.inappropriatePhoto" = "Inappropriate photo";
+"report.reason.harassment" = "Harassment";
+"report.reason.animalWelfare" = "Animal welfare concern";
+"report.reason.other" = "Other";
+"report.details.placeholder" = "Add any details (optional)";
+"report.submit" = "Submit report";
+"report.submitted" = "Thanks — we've received your report.";
+
+/* Notifications priming */
+"notif.priming.title" = "Never miss a match";
+"notif.priming.message" = "Turn on notifications so you know the moment you get a new match or message.";
+"notif.priming.enable" = "Turn on notifications";
 
 /* Paywall */
 "paywall.title" = "PawMatch Plus";

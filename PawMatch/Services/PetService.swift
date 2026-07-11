@@ -25,6 +25,11 @@ final class PetService: PetServicing {
         return try snapshot.documents.compactMap { try $0.data(as: Pet.self) }
     }
 
+    func fetchPet(petId: String) async throws -> Pet? {
+        let snapshot = try await petsCollection.document(petId).getDocument()
+        return try snapshot.data(as: Pet.self)
+    }
+
     func createPet(_ pet: Pet) async throws {
         guard let id = pet.id else {
             throw PetServiceError.missingId

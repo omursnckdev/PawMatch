@@ -53,4 +53,20 @@ final class UserService: UserServicing {
             "lastSwipeResetDate": Timestamp(date: lastResetDate)
         ])
     }
+
+    func setBlocked(uid: String, otherUserId: String, isBlocked: Bool) async throws {
+        let value: Any = isBlocked
+            ? FieldValue.arrayUnion([otherUserId])
+            : FieldValue.arrayRemove([otherUserId])
+        try await userDocument(uid).updateData(["blockedUserIds": value])
+    }
+
+    func setActiveChat(uid: String, matchId: String?) async throws {
+        let value: Any = matchId ?? FieldValue.delete()
+        try await userDocument(uid).updateData(["activeChatId": value])
+    }
+
+    func updateFCMToken(uid: String, token: String) async throws {
+        try await userDocument(uid).updateData(["fcmToken": token])
+    }
 }

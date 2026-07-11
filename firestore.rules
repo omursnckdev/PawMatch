@@ -78,6 +78,13 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // reports/{reportId} — users can file a report (create only); reports are
+    // readable/actionable only by backend/admin tooling (§10.8).
+    match /reports/{reportId} {
+      allow create: if isSignedIn() && request.resource.data.reporterUserId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

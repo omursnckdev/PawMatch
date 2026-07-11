@@ -1,7 +1,9 @@
 import FirebaseAppCheck
 import FirebaseCore
 import FirebaseCrashlytics
+import FirebaseMessaging
 import UIKit
+import UserNotifications
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
@@ -19,6 +21,55 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         // privacy setting later without hunting for the call site.
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
 
+        Messaging.messaging().delegate = self
+        UNUserNotificationCenter.current().delegate = self
+
         return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+}
+
+// MARK: - FCM token
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken else { return }
+        Task { @MainActor in
+            NotificationService.shared.handleTokenRefresh(fcmToken)
+        }
+    }
+}
+
+// MARK: - Notification presentation & taps
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    // Show the banner even when the app is foregrounded.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .badge, .sound])
+    }
+
+    // Tapping a match/message push deep-links into that conversation (§7 item 3).
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        if let matchId = userInfo["matchId"] as? String {
+            Task { @MainActor in
+                DeepLinkRouter.shared.openChat(matchId: matchId)
+            }
+        }
+        completionHandler()
     }
 }
