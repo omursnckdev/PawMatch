@@ -1,0 +1,8 @@
+app_identifier("com.pawmatch.app")
+
+# Set via environment / CI secrets rather than committing:
+#   apple_id (Apple Developer account email)
+#   itc_team_id / team_id
+apple_id(ENV["FASTLANE_APPLE_ID"])
+itc_team_id(ENV["FASTLANE_ITC_TEAM_ID"])
+team_id(ENV["FASTLANE_TEAM_ID"])

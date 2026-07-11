@@ -1,0 +1,7 @@
+# fastlane match (§16) — code-signing certs/profiles live in a private,
+# git-crypt-encrypted repo, never committed to this repo in plaintext.
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+type("appstore")
+app_identifier(["com.pawmatch.app"])
+readonly(true)

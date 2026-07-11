@@ -15,7 +15,13 @@
 "age.title" = "Before you continue";
 "age.body" = "PawMatch connects pet owners for playdates and breeding matches. You must be 18 or older to use it.";
 "age.confirm" = "I confirm that I am 18 years of age or older.";
+"age.agreePolicies" = "I agree to the Terms of Service, Privacy Policy, and Community Guidelines.";
 "age.continue" = "Continue";
+
+/* ATT priming */
+"att.priming.title" = "Personalized ads";
+"att.priming.message" = "Allow tracking to see more relevant ads. PawMatch works exactly the same either way — you can decline.";
+"att.priming.continue" = "Continue";
 
 /* Common */
 "common.notNow" = "Not now";

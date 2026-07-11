@@ -27,6 +27,14 @@ struct AuthView: View {
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
                 }
+
+                // Terms & Privacy must be reachable without an account (§13).
+                HStack(spacing: 14) {
+                    Link("legal.terms", destination: LegalLinks.termsOfService)
+                    Link("legal.privacy", destination: LegalLinks.privacyPolicy)
+                }
+                .font(.caption)
+                .padding(.top, 8)
             }
             .padding(24)
         }

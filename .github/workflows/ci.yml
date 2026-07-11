@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Provide placeholder secrets
+        run: |
+          cp Secrets.xcconfig.example Secrets.xcconfig
+          # A real GoogleService-Info.plist is injected from CI secrets in a
+          # private setup; unit tests use mocked services and don't need Firebase.
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Run unit tests
+        run: |
+          xcodebuild test \
+            -scheme PawMatch \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            CODE_SIGNING_ALLOWED=NO | xcpretty || exit ${PIPESTATUS[0]}

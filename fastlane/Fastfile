@@ -1,0 +1,54 @@
+# Fastlane pipeline for PawMatch (§16). A single `fastlane beta` takes a clean
+# checkout to a new TestFlight build.
+#
+# Prerequisites (not committed):
+#   - Secrets.xcconfig and GoogleService-Info.plist in place (see README)
+#   - App Store Connect API key configured via APP_STORE_CONNECT_API_KEY_* env
+#   - `fastlane match` set up against a private certificates repo (MATCH_GIT_URL)
+
+default_platform(:ios)
+
+APP_IDENTIFIER = "com.pawmatch.app"
+SCHEME = "PawMatch"
+
+platform :ios do
+  desc "Generate the Xcode project from project.yml (XcodeGen)"
+  lane :generate do
+    sh("cd .. && xcodegen generate")
+  end
+
+  desc "Run unit tests"
+  lane :test do
+    generate
+    run_tests(scheme: SCHEME, devices: ["iPhone 15"])
+  end
+
+  desc "Build and upload a new build to TestFlight"
+  lane :beta do
+    generate
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    )
+
+    match(type: "appstore", app_identifier: APP_IDENTIFIER, readonly: true)
+
+    increment_build_number(
+      build_number: latest_testflight_build_number(api_key: api_key, app_identifier: APP_IDENTIFIER) + 1,
+      xcodeproj: "PawMatch.xcodeproj"
+    )
+
+    build_app(
+      scheme: SCHEME,
+      export_method: "app-store",
+      configuration: "Release"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

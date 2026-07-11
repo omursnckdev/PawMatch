@@ -5,12 +5,23 @@ spec, architecture, data model, and build plan live in [`CLAUDE.md`](./CLAUDE.md
 
 ## Status
 
-**Milestones 1–3 scaffolded** (Foundation & Auth; Pet Profiles; Swipe Deck).
-This was built in a Linux container with no Xcode/Swift toolchain available, so the code has
-been written carefully against the Firebase/SwiftUI APIs but has **not been
-compiled or run** — the first thing to do on a Mac is open it in Xcode and fix
-whatever the compiler finds. Treat this as a strong first draft, not a verified
-build.
+**All six milestones scaffolded** (Foundation & Auth; Pet Profiles; Swipe Deck;
+Matching & Chat; Monetization; Publish Readiness). This was built in a Linux
+container with **no Xcode/Swift toolchain available**, so the code has been
+written carefully against the Firebase/SwiftUI/RevenueCat/AdMob APIs but has
+**not been compiled or run**. The first thing to do on a Mac is `xcodegen
+generate`, open it in Xcode, and fix whatever the compiler finds. Treat this as
+a thorough first draft, not a verified build.
+
+### ⚠️ Read before building
+- **AdMob symbol names**: `AdManager` / `NativeAdCardView` use the *un-prefixed*
+  Google Mobile Ads Swift API (`NativeAd`, `AdLoader`, `MobileAds`, `Request`).
+  Depending on the exact SDK version SPM resolves, you may need the `GAD`-prefixed
+  names (`GADNativeAd`, etc.). Adjust to match the version that resolves.
+- **RevenueCat `Package`** can't be constructed in unit tests, so
+  `PaywallViewModel.purchase(_:)` isn't directly unit-tested (the surrounding
+  logic is). Verify the purchase path manually with the StoreKit config file.
+- Everything else is covered under "Manual steps before submission" below.
 
 ### Milestone 1 — Foundation & Auth
 - Project structure generated from `project.yml` via [XcodeGen](https://github.com/yonaskolb/XcodeGen)
@@ -61,14 +72,40 @@ build.
 - Unit tests for `DailySwipeCounter` and `SwipeDeckViewModel` (exclusions,
   sorting, limit→paywall, midnight reset, premium bypass).
 
-Not started: matching, chat, push, monetization purchase flow, ads,
-report/block, delete account, App Store assets, Fastlane. Follow `CLAUDE.md`
-§12 for order.
+### Milestone 4 — Matching & Chat
+- Cloud Functions: `onSwipeCreated` (idempotent match detection via a
+  deterministic match id + FCM), `onMessageCreated` (lastMessage update,
+  profanity moderation pass, deep-link push, block-aware), `onPetPhotoUploaded`
+  (Cloud Vision SafeSearch).
+- `MatchService`/`ChatService` bridge Firestore listeners into `AsyncStream`;
+  Matches grid, Chat conversation list, real-time `ChatDetailView`.
+- "It's a Match!" modal via `MatchObserver`; FCM token sync + notification-tap
+  deep-link into the conversation.
+- Block + report (fixed-reason `ReportSheet`) with server-side rule enforcement
+  and client filtering. Notification permission priming.
 
-> Notes: the "add a second pet is Plus-gated" path and the Likes tab currently
-> show placeholder notes instead of the real paywall/purchase — those are built
-> in Milestone 5. AdMob native ad cards (every 10th card, free users) are also
-> Milestone 5.
+### Milestone 5 — Monetization
+- RevenueCat `PurchaseService`; `EntitlementManager` reads `isPremium` from the
+  Firestore field the `revenueCatWebhook` writes (source of truth), with an
+  optimistic unlock on purchase. `PaywallView` shows real offerings, purchase,
+  Restore Purchases, and subscription-terms disclosure.
+- Plus gating: unlimited swipes, second pet, "who liked you" Likes tab,
+  billing-issue grace banner.
+- AdMob native ad card every 10 swipes for free users (`AdManager` +
+  `NativeAdCardView`), non-personalized unless ATT is granted.
+
+### Milestone 6 — Publish Readiness
+- Delete Account flow (`AccountService` → `onAccountDeletionRequested` callable
+  that actually deletes pets/photos/swipes/matches/chats/user/auth).
+- ATT prompt with priming (§10.4); expanded `PrivacyInfo.xcprivacy`.
+- Terms / Privacy reachable pre-signup (AuthView) and acknowledged with
+  Community Guidelines at signup (age gate).
+- Fastlane `beta` lane (§16), GitHub Actions CI, App Check App Attest in release.
+
+Unit tests across `AuthViewModel`, `PetProfileViewModel`, `HomeViewModel`,
+`DailySwipeCounter`, `SwipeDeckViewModel`, `ChatDetailViewModel`,
+`MatchesViewModel`, and `DeleteAccountViewModel` — all against protocol-mocked
+services (no live Firebase).
 
 ## Getting started (on a Mac)
 
@@ -92,12 +129,31 @@ report/block, delete account, App Store assets, Fastlane. Follow `CLAUDE.md`
 See `CLAUDE.md` §5 for the intended structure. `CloudFunctions/` is a separate
 Node/TypeScript project deployed independently of the iOS app.
 
-## Known gaps / TODOs before Milestone 6 (Publish Readiness)
+4b. Deploy Cloud Functions: `cd CloudFunctions && npm install && npm run deploy`.
+    Set the RevenueCat webhook secret: `firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH`
+    and point the RevenueCat dashboard webhook at the deployed `revenueCatWebhook`
+    URL with that same Authorization value.
+9. Deploy indexes: `firebase deploy --only firestore:indexes`.
+10. `bundle install` then `fastlane beta` to produce a TestFlight build (§16).
 
-- `PrivacyInfo.xcprivacy` only lists data collected by app code so far; expand
-  it as RevenueCat/AdMob/additional Firebase products are integrated.
-- `AppIcon.appiconset` has no actual 1024×1024 image yet.
-- No Crashlytics dSYM-upload build phase yet — add one per Firebase's current
-  SPM instructions when Fastlane is set up (§16).
-- Cloud Functions (`onSwipeCreated`, `revenueCatWebhook`, `onMessageCreated`,
-  `onPetPhotoUploaded`) are stubbed but not implemented.
+## Manual steps before submission (can't be done in this environment)
+
+These need Xcode, an Apple Developer account, or live dashboards:
+
+- **Compile & fix**: no code here has been through a Swift compiler — expect to
+  fix API/signature mismatches (especially the AdMob symbol names noted above).
+- **App icon**: `AppIcon.appiconset` has only the JSON, no 1024×1024 art (§9/§13).
+- **Crashlytics dSYM upload**: add the Crashlytics run-script build phase per
+  Firebase's current SPM instructions (removed from `project.yml` to avoid a
+  broken path; wire it up in Xcode or Fastlane).
+- **App Check enforcement**: the client uses App Attest in release; you must also
+  *enforce* App Check on Firestore/Storage/Functions in the Firebase console (§13).
+- **RevenueCat / AdMob dashboards**: create products (`pawmatch_plus_monthly`,
+  `pawmatch_plus_annual`), the `plus` entitlement, and production ad units; switch
+  `AdManager` off the test ad unit for release (it already does this via `#if DEBUG`).
+- **StoreKit config file**: add one for local purchase testing (§8).
+- **Legal pages**: host real Terms / Privacy / Community Guidelines at the URLs in
+  `LegalLinks.swift` (§13).
+- **App Privacy answers** in App Store Connect must match `PrivacyInfo.xcprivacy`.
+- **Emulator rule tests** (§11): run the Firebase Local Emulator Suite against
+  `firestore.rules` before deploying.

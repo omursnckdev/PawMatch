@@ -1,14 +1,17 @@
 import SwiftUI
 
-/// First-run 18+ gate (§10.6). Community Guidelines / Terms acknowledgment is
-/// added alongside this in Milestone 6 once those pages exist (§10.8, §13).
+/// First-run 18+ gate (§10.6) plus the Terms / Community Guidelines
+/// acknowledgment required at signup (§10.8, §13).
 struct AgeConfirmationView: View {
     @ObservedObject var viewModel: AuthViewModel
-    @State private var isConfirmed = false
+    @State private var isAgeConfirmed = false
+    @State private var agreedToPolicies = false
     @State private var isSubmitting = false
 
+    private var canContinue: Bool { isAgeConfirmed && agreedToPolicies && !isSubmitting }
+
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.pawOrange)
@@ -21,11 +24,17 @@ struct AgeConfirmationView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
-            Toggle(isOn: $isConfirmed) {
-                Text("age.confirm")
-                    .font(.subheadline)
+            Toggle(isOn: $isAgeConfirmed) {
+                Text("age.confirm").font(.subheadline)
             }
             .toggleStyle(.switch)
+
+            Toggle(isOn: $agreedToPolicies) {
+                Text("age.agreePolicies").font(.subheadline)
+            }
+            .toggleStyle(.switch)
+
+            legalLinks
 
             Button {
                 Task {
@@ -40,8 +49,8 @@ struct AgeConfirmationView: View {
                     Text("age.continue")
                 }
             }
-            .buttonStyle(PrimaryButtonStyle(isDisabled: !isConfirmed))
-            .disabled(!isConfirmed || isSubmitting)
+            .buttonStyle(PrimaryButtonStyle(isDisabled: !canContinue))
+            .disabled(!canContinue)
 
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
@@ -54,6 +63,15 @@ struct AgeConfirmationView: View {
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
+    }
+
+    private var legalLinks: some View {
+        HStack(spacing: 14) {
+            Link("legal.terms", destination: LegalLinks.termsOfService)
+            Link("legal.privacy", destination: LegalLinks.privacyPolicy)
+            Link("legal.community", destination: LegalLinks.communityGuidelines)
+        }
+        .font(.caption)
     }
 }
 

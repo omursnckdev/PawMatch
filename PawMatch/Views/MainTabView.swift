@@ -11,7 +11,9 @@ struct MainTabView: View {
     @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
     @State private var selectedTab: Tab = .swipe
     @AppStorage("didPrimeNotifications") private var didPrimeNotifications = false
+    @AppStorage("didPrimeTracking") private var didPrimeTracking = false
     @State private var showNotificationPriming = false
+    @State private var showTrackingPriming = false
 
     enum Tab: Hashable {
         case swipe, matches, chat, likes, profile
@@ -47,12 +49,16 @@ struct MainTabView: View {
         .onAppear {
             matchObserver.start()
             Task { await NotificationService.shared.syncToken() }
-            if !didPrimeNotifications { showNotificationPriming = true }
+            if !didPrimeNotifications {
+                showNotificationPriming = true
+            } else {
+                maybePrimeTracking()
+            }
         }
         .onChange(of: deepLinkRouter.pendingMatchId) { _, matchId in
             if matchId != nil { selectedTab = .chat }
         }
-        .sheet(isPresented: $showNotificationPriming) {
+        .sheet(isPresented: $showNotificationPriming, onDismiss: maybePrimeTracking) {
             PermissionPrimingView(
                 systemImage: "bell.badge.fill",
                 title: "notif.priming.title",
@@ -69,6 +75,19 @@ struct MainTabView: View {
                 }
             )
         }
+        .sheet(isPresented: $showTrackingPriming) {
+            PermissionPrimingView(
+                systemImage: "hand.raised.circle.fill",
+                title: "att.priming.title",
+                message: "att.priming.message",
+                primaryButtonTitle: "att.priming.continue",
+                onContinue: {
+                    didPrimeTracking = true
+                    showTrackingPriming = false
+                    Task { await TrackingAuthorization.requestIfNeeded() }
+                }
+            )
+        }
         .fullScreenCover(item: $matchObserver.newMatch) { row in
             MatchModalView(
                 row: row,
@@ -82,6 +101,13 @@ struct MainTabView: View {
                 onKeepSwiping: { matchObserver.dismiss() }
             )
         }
+    }
+
+    /// Presents the ATT priming once, only after notifications have been handled,
+    /// so the two system prompts don't stack on first launch.
+    private func maybePrimeTracking() {
+        guard !didPrimeTracking, !TrackingAuthorization.isDetermined else { return }
+        showTrackingPriming = true
     }
 
     @ViewBuilder
