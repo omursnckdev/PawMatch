@@ -11,7 +11,9 @@ import * as admin from "firebase-admin";
  *   firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH
  * and configure the same value in the RevenueCat dashboard.
  */
-export const revenueCatWebhook = functions.https.onRequest(async (req, res) => {
+export const revenueCatWebhook = functions
+  .runWith({ secrets: ["REVENUECAT_WEBHOOK_AUTH"] })
+  .https.onRequest(async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).send("Method Not Allowed");
     return;

@@ -220,7 +220,7 @@ final class MockSwipeService: SwipeServicing {
         swipedTargetPetIds
     }
 
-    func fetchIncomingSuperlikerPetIds(targetPetId: String) async throws -> Set<String> {
+    func fetchIncomingSuperlikerPetIds(targetOwnerId: String, targetPetId: String) async throws -> Set<String> {
         incomingSuperlikerPetIds
     }
 

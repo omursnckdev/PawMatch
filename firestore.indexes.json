@@ -33,6 +33,14 @@
         { "fieldPath": "direction", "order": "ASCENDING" },
         { "fieldPath": "timestamp", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "matches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "matchedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

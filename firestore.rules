@@ -75,7 +75,11 @@ service cloud.firestore {
         && !(request.auth.uid in userDoc(
               otherParticipant(get(/databases/$(database)/documents/matches/$(matchId)).data.userIds, request.auth.uid)
             ).blockedUserIds);
-      allow update, delete: if false;
+      // Participants may only mark messages as read (mutate `readBy`), nothing else.
+      allow update: if isSignedIn()
+        && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.userIds
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+      allow delete: if false;
     }
 
     // reports/{reportId} — users can file a report (create only); reports are

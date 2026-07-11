@@ -64,6 +64,15 @@ targets:
         ITSAppUsesNonExemptEncryption: NO
         CFBundleLocalizations: [en]
         CFBundleDevelopmentRegion: en
+        # Surface secrets from Secrets.xcconfig into the Info.plist so they can be
+        # read at runtime via Bundle.main.object(forInfoDictionaryKey:).
+        # GADApplicationIdentifier is REQUIRED by AdMob — MobileAds.start crashes
+        # without it.
+        GADApplicationIdentifier: $(ADMOB_APP_ID)
+        REVENUECAT_PUBLIC_API_KEY: $(REVENUECAT_PUBLIC_API_KEY)
+        ADMOB_NATIVE_AD_UNIT_ID: $(ADMOB_NATIVE_AD_UNIT_ID)
+        # SKAdNetwork identifiers for AdMob attribution should be added here per
+        # Google's current list before shipping ads (§8).
     dependencies:
       - package: Firebase
         product: FirebaseAuth

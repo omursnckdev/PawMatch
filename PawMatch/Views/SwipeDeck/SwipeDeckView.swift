@@ -18,7 +18,7 @@ struct SwipeDeckView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 content
-                if !viewModel.isLoading && !viewModel.isDeckExhausted {
+                if !viewModel.isLoading && !viewModel.isDeckExhausted && !viewModel.showAd {
                     actionButtons
                     remainingLabel
                 }

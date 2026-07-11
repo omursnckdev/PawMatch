@@ -26,15 +26,18 @@ final class SwipeService: SwipeServicing {
         return Set(ids)
     }
 
-    func fetchIncomingSuperlikerPetIds(targetPetId: String) async throws -> Set<String> {
-        // Filter `direction` client-side so this needs only the single-field
-        // auto-index on `targetPetId` rather than a dedicated composite index.
+    func fetchIncomingSuperlikerPetIds(targetOwnerId: String, targetPetId: String) async throws -> Set<String> {
+        // Query is constrained to `targetOwnerId == uid` so it satisfies the
+        // swipes read rule (a bare `targetPetId ==` query would be rejected as
+        // unauthorized). `targetPetId` + `direction` are filtered client-side,
+        // avoiding an extra composite index.
         let snapshot = try await swipesCollection
-            .whereField("targetPetId", isEqualTo: targetPetId)
+            .whereField("targetOwnerId", isEqualTo: targetOwnerId)
             .getDocuments()
         let ids = snapshot.documents.compactMap { document -> String? in
             let data = document.data()
-            guard data["direction"] as? String == Swipe.Direction.superlike.rawValue else { return nil }
+            guard data["targetPetId"] as? String == targetPetId,
+                  data["direction"] as? String == Swipe.Direction.superlike.rawValue else { return nil }
             return data["swiperPetId"] as? String
         }
         return Set(ids)

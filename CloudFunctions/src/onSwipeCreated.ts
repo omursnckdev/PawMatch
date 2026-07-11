@@ -16,16 +16,21 @@ export const onSwipeCreated = functions.firestore
 
     const db = admin.firestore();
 
-    // Reciprocal swipe: the target's pet swiped right on the swiper's pet.
+    // Reciprocal swipe: the target's pet swiped right on the swiper's pet. The
+    // direction is filtered in code (not in the query) so this needs only the
+    // two-field composite index on swiperPetId + targetPetId (§6.2), rather than
+    // a three-field index including direction.
     const reciprocal = await db
       .collection("swipes")
       .where("swiperPetId", "==", swipe.targetPetId)
       .where("targetPetId", "==", swipe.swiperPetId)
-      .where("direction", "in", ["like", "superlike"])
-      .limit(1)
       .get();
 
-    if (reciprocal.empty) {
+    const hasReciprocalLike = reciprocal.docs.some((doc) => {
+      const direction = doc.get("direction");
+      return direction === "like" || direction === "superlike";
+    });
+    if (!hasReciprocalLike) {
       return;
     }
 

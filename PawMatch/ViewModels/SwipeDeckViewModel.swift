@@ -153,14 +153,14 @@ final class SwipeDeckViewModel: ObservableObject {
 
         var updated = counter().resetIfNeeded(now: now())
 
+        // Presenting the paywall logs `paywall_viewed` from PaywallViewModel.onAppear,
+        // so it isn't logged here (that would double-count).
         if direction == .superlike, !updated.canSuperlike(isPremium: isPremium) {
             paywallSource = .superlikeLimit
-            analytics.log(.paywallViewed(source: PaywallSource.superlikeLimit.rawValue))
             return false
         }
         guard updated.canSwipe(isPremium: isPremium) else {
             paywallSource = .swipeLimit
-            analytics.log(.paywallViewed(source: PaywallSource.swipeLimit.rawValue))
             return false
         }
 
@@ -233,7 +233,10 @@ final class SwipeDeckViewModel: ObservableObject {
 
     private func incomingSuperlikerPetIds() async -> Set<String> {
         guard let petId = activePet.id else { return [] }
-        return (try? await swipeService.fetchIncomingSuperlikerPetIds(targetPetId: petId)) ?? []
+        return (try? await swipeService.fetchIncomingSuperlikerPetIds(
+            targetOwnerId: activePet.ownerId,
+            targetPetId: petId
+        )) ?? []
     }
 
     private func distanceKm(to pet: Pet) -> Double {

@@ -88,7 +88,9 @@ final class SwipeDeckViewModelTests: XCTestCase {
         XCTAssertFalse(recorded)
         XCTAssertTrue(swipeService.recordedSwipes.isEmpty)
         XCTAssertEqual(vm.paywallSource, .swipeLimit)
-        XCTAssertTrue(analytics.loggedEventNames.contains("paywall_viewed"))
+        // paywall_viewed is logged by PaywallViewModel when the sheet appears,
+        // not here — so no swipe was recorded and no swipe event fired.
+        XCTAssertFalse(analytics.loggedEventNames.contains("swipe_performed"))
     }
 
     func testNewDayResetsLimitAndAllowsSwipe() async {

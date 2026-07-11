@@ -12,11 +12,17 @@ struct MainTabView: View {
     @State private var selectedTab: Tab = .swipe
     @AppStorage("didPrimeNotifications") private var didPrimeNotifications = false
     @AppStorage("didPrimeTracking") private var didPrimeTracking = false
-    @State private var showNotificationPriming = false
-    @State private var showTrackingPriming = false
+    @State private var activePriming: Priming?
 
     enum Tab: Hashable {
         case swipe, matches, chat, likes, profile
+    }
+
+    /// First-run permission priming steps, presented one at a time through a
+    /// single sheet so SwiftUI never has to juggle two `.sheet` modifiers.
+    private enum Priming: Identifiable {
+        case notifications, tracking
+        var id: Int { hashValue }
     }
 
     /// The pet the user swipes as. Free users have exactly one; a multi-pet
@@ -49,44 +55,13 @@ struct MainTabView: View {
         .onAppear {
             matchObserver.start()
             Task { await NotificationService.shared.syncToken() }
-            if !didPrimeNotifications {
-                showNotificationPriming = true
-            } else {
-                maybePrimeTracking()
-            }
+            advancePriming()
         }
         .onChange(of: deepLinkRouter.pendingMatchId) { _, matchId in
             if matchId != nil { selectedTab = .chat }
         }
-        .sheet(isPresented: $showNotificationPriming, onDismiss: maybePrimeTracking) {
-            PermissionPrimingView(
-                systemImage: "bell.badge.fill",
-                title: "notif.priming.title",
-                message: "notif.priming.message",
-                primaryButtonTitle: "notif.priming.enable",
-                onContinue: {
-                    didPrimeNotifications = true
-                    showNotificationPriming = false
-                    Task { await NotificationService.shared.requestAuthorization() }
-                },
-                onSkip: {
-                    didPrimeNotifications = true
-                    showNotificationPriming = false
-                }
-            )
-        }
-        .sheet(isPresented: $showTrackingPriming) {
-            PermissionPrimingView(
-                systemImage: "hand.raised.circle.fill",
-                title: "att.priming.title",
-                message: "att.priming.message",
-                primaryButtonTitle: "att.priming.continue",
-                onContinue: {
-                    didPrimeTracking = true
-                    showTrackingPriming = false
-                    Task { await TrackingAuthorization.requestIfNeeded() }
-                }
-            )
+        .sheet(item: $activePriming, onDismiss: advancePriming) { priming in
+            primingSheet(priming)
         }
         .fullScreenCover(item: $matchObserver.newMatch) { row in
             MatchModalView(
@@ -103,11 +78,51 @@ struct MainTabView: View {
         }
     }
 
-    /// Presents the ATT priming once, only after notifications have been handled,
-    /// so the two system prompts don't stack on first launch.
-    private func maybePrimeTracking() {
-        guard !didPrimeTracking, !TrackingAuthorization.isDetermined else { return }
-        showTrackingPriming = true
+    /// Presents the next outstanding first-run priming step. Called on appear and
+    /// after each priming sheet dismisses, so notifications and ATT are shown in
+    /// sequence rather than stacked.
+    private func advancePriming() {
+        if !didPrimeNotifications {
+            activePriming = .notifications
+        } else if !didPrimeTracking && !TrackingAuthorization.isDetermined {
+            activePriming = .tracking
+        } else {
+            activePriming = nil
+        }
+    }
+
+    @ViewBuilder
+    private func primingSheet(_ priming: Priming) -> some View {
+        switch priming {
+        case .notifications:
+            PermissionPrimingView(
+                systemImage: "bell.badge.fill",
+                title: "notif.priming.title",
+                message: "notif.priming.message",
+                primaryButtonTitle: "notif.priming.enable",
+                onContinue: {
+                    didPrimeNotifications = true
+                    activePriming = nil
+                    Task { await NotificationService.shared.requestAuthorization() }
+                },
+                onSkip: {
+                    didPrimeNotifications = true
+                    activePriming = nil
+                }
+            )
+        case .tracking:
+            PermissionPrimingView(
+                systemImage: "hand.raised.circle.fill",
+                title: "att.priming.title",
+                message: "att.priming.message",
+                primaryButtonTitle: "att.priming.continue",
+                onContinue: {
+                    didPrimeTracking = true
+                    activePriming = nil
+                    Task { await TrackingAuthorization.requestIfNeeded() }
+                }
+            )
+        }
     }
 
     @ViewBuilder

@@ -10,8 +10,9 @@ protocol SwipeServicing {
     func fetchSwipedTargetPetIds(swiperUserId: String) async throws -> Set<String>
 
     /// Pet ids that have already **superliked** the given pet — used to float
-    /// those cards to the top of the deck with a Superlike badge (§3).
-    func fetchIncomingSuperlikerPetIds(targetPetId: String) async throws -> Set<String>
+    /// those cards to the top of the deck with a Superlike badge (§3). Takes the
+    /// owner id so the query stays within the swipes read rule.
+    func fetchIncomingSuperlikerPetIds(targetOwnerId: String, targetPetId: String) async throws -> Set<String>
 
     /// Pet ids that have liked/superliked any of the user's pets — backs the
     /// Plus-only "who liked you" list (§3, Likes tab).
