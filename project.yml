@@ -72,6 +72,8 @@ targets:
       - package: Firebase
         product: FirebaseStorage
       - package: Firebase
+        product: FirebaseFunctions
+      - package: Firebase
         product: FirebaseMessaging
       - package: Firebase
         product: FirebaseAppCheck

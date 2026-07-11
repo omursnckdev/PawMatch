@@ -35,13 +35,9 @@ struct MainTabView: View {
                 .tabItem { Label("tab.chat", systemImage: "bubble.left.and.bubble.right.fill") }
                 .tag(Tab.chat)
 
-            PlaceholderView(
-                systemImage: "heart.fill",
-                title: "placeholder.likes.title",
-                message: "placeholder.likes.message"
-            )
-            .tabItem { Label("tab.likes", systemImage: "heart.fill") }
-            .tag(Tab.likes)
+            LikesView()
+                .tabItem { Label("tab.likes", systemImage: "heart.fill") }
+                .tag(Tab.likes)
 
             ManagePetsView(pets: pets, homeViewModel: homeViewModel, onSignOut: onSignOut)
                 .tabItem { Label("tab.profile", systemImage: "person.crop.circle.fill") }

@@ -30,7 +30,18 @@ struct HomeGateView: View {
                 errorState(message)
             }
         }
-        .task { await viewModel.load() }
+        .task {
+            await startEntitlements()
+            await viewModel.load()
+        }
+    }
+
+    /// Associates RevenueCat with the Firebase uid and begins listening to the
+    /// authoritative `isPremium` field (§8).
+    private func startEntitlements() async {
+        guard let uid = AuthService.shared.currentUserId else { return }
+        EntitlementManager.shared.start(uid: uid)
+        await PurchaseService.shared.logIn(uid: uid)
     }
 
     private var loadingState: some View {

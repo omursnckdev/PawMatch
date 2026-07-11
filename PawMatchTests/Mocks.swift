@@ -223,6 +223,11 @@ final class MockSwipeService: SwipeServicing {
     func fetchIncomingSuperlikerPetIds(targetPetId: String) async throws -> Set<String> {
         incomingSuperlikerPetIds
     }
+
+    var incomingLikerPetIds: [String] = []
+    func fetchIncomingLikerPetIds(targetOwnerId: String) async throws -> [String] {
+        incomingLikerPetIds
+    }
 }
 
 final class MockMatchService: MatchServicing {
@@ -262,6 +267,16 @@ final class MockChatService: ChatServicing {
 
     func markMessagesRead(matchId: String, userId: String, messageIds: [String]) async throws {
         markedReadIds.append(contentsOf: messageIds)
+    }
+}
+
+final class MockAccountService: AccountServicing {
+    var error: Error?
+    private(set) var deleteCallCount = 0
+
+    func deleteAccount() async throws {
+        deleteCallCount += 1
+        if let error { throw error }
     }
 }
 

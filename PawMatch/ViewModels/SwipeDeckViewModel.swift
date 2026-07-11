@@ -31,6 +31,15 @@ final class SwipeDeckViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var paywallSource: PaywallSource?
 
+    /// True when an ad card should be shown before the next pet card — set every
+    /// 10th swipe for free users only (§8). The view renders `NativeAdCardView`
+    /// while this is true and calls `dismissAd()` to continue.
+    @Published private(set) var showAd = false
+
+    /// Insert an ad after every N swiped cards.
+    static let adFrequency = 10
+    private var swipesSinceAd = 0
+
     /// Search radius for the deck query. A fixed value in v1; distance filtering
     /// itself is free, radius selection is a candidate Plus filter later.
     private let radiusMeters: Double = 50_000
@@ -177,6 +186,15 @@ final class SwipeDeckViewModel: ObservableObject {
             applyCounter(updated)
             analytics.log(.swipePerformed(direction: direction.rawValue))
             advance()
+
+            // Every 10th swipe, free users get a native ad card before the next pet.
+            if !isPremium {
+                swipesSinceAd += 1
+                if swipesSinceAd >= Self.adFrequency {
+                    swipesSinceAd = 0
+                    showAd = true
+                }
+            }
             return true
         } catch {
             errorMessage = error.localizedDescription
@@ -187,6 +205,10 @@ final class SwipeDeckViewModel: ObservableObject {
     func dismissPaywall() {
         paywallSource = nil
         analytics.log(.paywallDismissed)
+    }
+
+    func dismissAd() {
+        showAd = false
     }
 
     // MARK: - Helpers

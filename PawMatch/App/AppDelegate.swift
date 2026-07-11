@@ -2,6 +2,7 @@ import FirebaseAppCheck
 import FirebaseCore
 import FirebaseCrashlytics
 import FirebaseMessaging
+import GoogleMobileAds
 import UIKit
 import UserNotifications
 
@@ -23,6 +24,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
+
+        // Monetization SDKs (§8). RevenueCat is associated with the Firebase uid
+        // on sign-in (see RootView); AdMob starts its mediation here.
+        PurchaseService.shared.configure()
+        MobileAds.shared.start(completionHandler: nil)
 
         return true
     }

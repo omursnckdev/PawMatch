@@ -8,9 +8,11 @@ struct ManagePetsView: View {
     @ObservedObject var homeViewModel: HomeViewModel
     let onSignOut: () -> Void
 
+    @ObservedObject private var entitlements = EntitlementManager.shared
     @State private var editorState: EditorState?
     @State private var petPendingDeletion: Pet?
-    @State private var showSecondPetPlusNote = false
+    @State private var showSecondPetPaywall = false
+    @State private var showSettings = false
 
     /// Wraps the optional pet in an Identifiable so `.sheet(item:)` can drive
     /// both "add" (nil pet) and "edit" (existing pet) from one presentation.
@@ -23,6 +25,10 @@ struct ManagePetsView: View {
         NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 16) {
+                    if entitlements.billingIssue {
+                        billingIssueBanner
+                    }
+
                     ForEach(pets) { pet in
                         petRow(pet)
                     }
@@ -41,8 +47,15 @@ struct ManagePetsView: View {
             .navigationTitle("managePets.title")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("common.signOut", action: onSignOut)
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(isPremium: entitlements.isPremium, onSignOut: onSignOut)
             }
             .sheet(item: $editorState) { editor in
                 PetProfileSetupView(
@@ -69,10 +82,20 @@ struct ManagePetsView: View {
             } message: {
                 Text("managePets.deleteConfirm.message")
             }
-            .alert("managePets.addPlus", isPresented: $showSecondPetPlusNote) {
-                Button("common.cancel", role: .cancel) {}
+            .sheet(isPresented: $showSecondPetPaywall) {
+                PaywallView(source: .secondPet, onDismiss: { showSecondPetPaywall = false })
             }
         }
+    }
+
+    private var billingIssueBanner: some View {
+        Label("billing.issue.banner", systemImage: "exclamationmark.circle.fill")
+            .font(.footnote)
+            .foregroundStyle(.orange)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(Color.orange.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private func petRow(_ pet: Pet) -> some View {
@@ -104,12 +127,11 @@ struct ManagePetsView: View {
 
     private var addPetButton: some View {
         Button {
-            // Second (and beyond) pet is a PawMatch Plus feature. The real
-            // paywall is presented here in Milestone 5; until then, a note.
-            if pets.isEmpty {
+            // A second (and beyond) pet is a PawMatch Plus feature (§3).
+            if pets.isEmpty || entitlements.isPremium {
                 editorState = EditorState(pet: nil)
             } else {
-                showSecondPetPlusNote = true
+                showSecondPetPaywall = true
             }
         } label: {
             Label("managePets.add", systemImage: "plus")

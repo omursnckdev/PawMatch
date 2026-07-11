@@ -5,6 +5,7 @@ import SwiftUI
 /// accessibility. Hitting the free daily limit presents the paywall.
 struct SwipeDeckView: View {
     @StateObject private var viewModel: SwipeDeckViewModel
+    @StateObject private var adManager = AdManager()
     @State private var dragOffset: CGSize = .zero
 
     private let swipeThreshold: CGFloat = 120
@@ -48,6 +49,8 @@ struct SwipeDeckView: View {
     private var content: some View {
         if viewModel.isLoading {
             loadingState
+        } else if viewModel.showAd {
+            adCard
         } else if viewModel.isDeckExhausted {
             PlaceholderView(
                 systemImage: "pawprint",
@@ -56,6 +59,29 @@ struct SwipeDeckView: View {
             )
         } else {
             cardStack
+        }
+    }
+
+    private var adCard: some View {
+        VStack(spacing: 16) {
+            Group {
+                if let ad = adManager.nativeAd {
+                    NativeAdCardView(nativeAd: ad)
+                } else {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color(.secondarySystemBackground))
+                        .overlay(ProgressView())
+                }
+            }
+            .frame(maxHeight: .infinity)
+
+            Button("deck.ad.continue") { viewModel.dismissAd() }
+                .buttonStyle(PrimaryButtonStyle())
+        }
+        .onAppear {
+            // Non-personalized unless ATT was granted (§10.4). The ATT status is
+            // read via TrackingAuthorization; default to non-personalized.
+            adManager.loadAd(trackingAuthorized: TrackingAuthorization.isAuthorized)
         }
     }
 

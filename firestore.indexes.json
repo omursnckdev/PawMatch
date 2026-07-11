@@ -24,6 +24,15 @@
         { "fieldPath": "swiperPetId", "order": "ASCENDING" },
         { "fieldPath": "targetPetId", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "swipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "targetOwnerId", "order": "ASCENDING" },
+        { "fieldPath": "direction", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

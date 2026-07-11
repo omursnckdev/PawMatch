@@ -39,4 +39,22 @@ final class SwipeService: SwipeServicing {
         }
         return Set(ids)
     }
+
+    func fetchIncomingLikerPetIds(targetOwnerId: String) async throws -> [String] {
+        let snapshot = try await swipesCollection
+            .whereField("targetOwnerId", isEqualTo: targetOwnerId)
+            .whereField("direction", in: [Swipe.Direction.like.rawValue, Swipe.Direction.superlike.rawValue])
+            .order(by: "timestamp", descending: true)
+            .limit(to: 100)
+            .getDocuments()
+        // De-duplicate while preserving most-recent-first order.
+        var seen = Set<String>()
+        var ordered: [String] = []
+        for document in snapshot.documents {
+            guard let petId = document.data()["swiperPetId"] as? String, !seen.contains(petId) else { continue }
+            seen.insert(petId)
+            ordered.append(petId)
+        }
+        return ordered
+    }
 }

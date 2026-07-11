@@ -90,10 +90,14 @@
 "deck.action.pass" = "Pass";
 "deck.action.superlike" = "Superlike";
 "deck.action.like" = "Like";
+"deck.ad.continue" = "Continue";
 
-/* Placeholder tabs (built in later milestones) */
+/* Likes */
 "placeholder.likes.title" = "See who liked your pet";
 "placeholder.likes.message" = "Knowing who already liked you is a PawMatch Plus feature.";
+"likes.unlock" = "Unlock with Plus";
+"likes.empty.title" = "No likes yet";
+"likes.empty.message" = "When someone likes your pet, they'll show up here.";
 
 /* Matches & chat */
 "matches.title" = "Matches";
@@ -148,6 +152,38 @@
 "paywall.benefit.whoLiked" = "See who liked you";
 "paywall.benefit.boost" = "1 monthly Boost";
 "paywall.benefit.noAds" = "No ads";
-"paywall.subscribe.comingSoon" = "Subscriptions coming soon";
+"paywall.subscribe" = "Subscribe";
+"paywall.restore" = "Restore Purchases";
+"paywall.restore.none" = "No active subscription was found to restore.";
+"paywall.unavailable" = "Subscriptions are temporarily unavailable. Please try again later.";
 "paywall.maybeLater" = "Maybe later";
-"paywall.terms.placeholder" = "Pricing, auto-renewal, and cancellation terms are shown here once subscriptions are enabled.";
+"paywall.terms" = "Subscriptions renew automatically unless canceled at least 24 hours before the end of the period. Manage or cancel anytime in your App Store account settings. Payment is charged to your Apple ID.";
+
+/* Legal */
+"legal.terms" = "Terms of Service";
+"legal.privacy" = "Privacy Policy";
+"legal.community" = "Community Guidelines";
+"legal.manageSubscription" = "Manage Subscription";
+
+/* Billing */
+"billing.issue.banner" = "There's a problem with your payment method. Update it to keep PawMatch Plus.";
+
+/* Settings */
+"settings.title" = "Settings";
+"common.done" = "Done";
+"settings.subscription.header" = "Subscription";
+"settings.subscription.status" = "Current plan";
+"settings.subscription.plus" = "PawMatch Plus";
+"settings.subscription.free" = "Free";
+"settings.restore.success" = "Your purchases have been restored.";
+"settings.legal.header" = "About";
+"settings.deleteAccount" = "Delete Account";
+
+/* Delete account */
+"deleteAccount.title" = "Delete Account";
+"deleteAccount.warning.title" = "This can't be undone";
+"deleteAccount.warning.message" = "Deleting your account permanently removes your pets, photos, matches, and messages. This is not the same as signing out.";
+"deleteAccount.confirm.checkbox" = "I understand this permanently deletes my account and data.";
+"deleteAccount.button" = "Permanently delete my account";
+"deleteAccount.deleting" = "Deleting your account…";
+"deleteAccount.error" = "We couldn't delete your account. Please try again.";

@@ -132,6 +132,37 @@ final class SwipeDeckViewModelTests: XCTestCase {
         XCTAssertNil(vm.remainingSwipes)
     }
 
+    func testAdShownAfterTenSwipesForFreeUser() async {
+        userService.storedUsers["owner-1"] = TestFixtures.user(isPremium: false)
+        deckService.candidates = (0..<20).map { TestFixtures.pet(id: "p\($0)", ownerId: "owner-\($0 + 2)", name: "P\($0)") }
+
+        let vm = makeViewModel()
+        await vm.load()
+
+        for _ in 0..<9 {
+            _ = await vm.swipe(.pass)
+            XCTAssertFalse(vm.showAd)
+        }
+        _ = await vm.swipe(.pass) // 10th swipe
+        XCTAssertTrue(vm.showAd)
+
+        vm.dismissAd()
+        XCTAssertFalse(vm.showAd)
+    }
+
+    func testAdNeverShownForPremiumUser() async {
+        userService.storedUsers["owner-1"] = TestFixtures.user(isPremium: true)
+        deckService.candidates = (0..<20).map { TestFixtures.pet(id: "p\($0)", ownerId: "owner-\($0 + 2)", name: "P\($0)") }
+
+        let vm = makeViewModel()
+        await vm.load()
+
+        for _ in 0..<15 {
+            _ = await vm.swipe(.pass)
+            XCTAssertFalse(vm.showAd)
+        }
+    }
+
     func testDeckExhaustionAfterSwipingAll() async {
         userService.storedUsers["owner-1"] = TestFixtures.user()
         deckService.candidates = [TestFixtures.pet(id: "only", ownerId: "owner-3", name: "Only")]
