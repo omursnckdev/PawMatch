@@ -13,7 +13,7 @@ struct RootView: View {
             case .needsAgeConfirmation:
                 AgeConfirmationView(viewModel: authViewModel)
             case .ready:
-                ComingSoonView(viewModel: authViewModel)
+                HomeGateView(authViewModel: authViewModel)
             }
         }
         .animation(.default, value: authViewModel.sessionState)

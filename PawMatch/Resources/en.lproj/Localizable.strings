@@ -16,3 +16,59 @@
 "age.body" = "PawMatch connects pet owners for playdates and breeding matches. You must be 18 or older to use it.";
 "age.confirm" = "I confirm that I am 18 years of age or older.";
 "age.continue" = "Continue";
+
+/* Common */
+"common.notNow" = "Not now";
+"common.continue" = "Continue";
+"common.back" = "Back";
+"common.save" = "Save";
+"common.cancel" = "Cancel";
+"common.delete" = "Delete";
+"common.retry" = "Retry";
+"common.signOut" = "Sign Out";
+
+/* Purposes & badges */
+"purpose.playdate" = "Playdate";
+"purpose.breeding" = "Breeding";
+"badge.superliked" = "Superliked";
+
+/* Distance */
+"distance.lessThanOneKm" = "Less than 1 km away";
+"distance.kmAway" = "%d km away";
+
+/* Pet profile setup */
+"petSetup.title.create" = "Add your pet";
+"petSetup.title.edit" = "Edit pet";
+"petSetup.step.basics" = "The basics";
+"petSetup.step.photos" = "Add photos";
+"petSetup.step.purpose" = "What are you looking for?";
+"petSetup.step.location" = "See pets near you";
+"petSetup.field.name" = "Name";
+"petSetup.field.species" = "Species";
+"petSetup.field.breed" = "Breed";
+"petSetup.field.age" = "Age (years)";
+"petSetup.field.sex" = "Sex";
+"petSetup.field.bio" = "Bio";
+"petSetup.photos.add" = "Add photos";
+"petSetup.photos.hint" = "Add at least one photo. The first one is your pet's main picture.";
+"petSetup.purpose.hint" = "Pick one or both. You can change this later.";
+"petSetup.location.priming" = "PawMatch uses your location to show nearby pets and how far away each one is. We never show your exact address.";
+"petSetup.location.enable" = "Enable Location";
+"petSetup.location.set" = "Location set";
+"petSetup.finish" = "Finish";
+"petSetup.saving" = "Saving your pet…";
+"species.dog" = "Dog";
+"species.cat" = "Cat";
+"species.other" = "Other";
+"sex.male" = "Male";
+"sex.female" = "Female";
+
+/* Home / manage pets */
+"home.loading" = "Loading…";
+"managePets.title" = "My Pets";
+"managePets.add" = "Add a Pet";
+"managePets.addPlus" = "Adding a second pet is a PawMatch Plus feature.";
+"managePets.deleteConfirm.title" = "Delete this pet?";
+"managePets.deleteConfirm.message" = "This permanently removes the profile and its photos.";
+"managePets.empty" = "You haven't added a pet yet.";
+"error.generic" = "Something went wrong. Please try again.";

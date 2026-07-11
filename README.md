@@ -5,14 +5,14 @@ spec, architecture, data model, and build plan live in [`CLAUDE.md`](./CLAUDE.md
 
 ## Status
 
-**Milestone 1 (Foundation & Auth) scaffold is in place.** This was built in a
-Linux container with no Xcode/Swift toolchain available, so the code below has
+**Milestones 1–2 scaffolded** (Foundation & Auth; Pet Profiles). This was built
+in a Linux container with no Xcode/Swift toolchain available, so the code has
 been written carefully against the Firebase/SwiftUI APIs but has **not been
 compiled or run** — the first thing to do on a Mac is open it in Xcode and fix
 whatever the compiler finds. Treat this as a strong first draft, not a verified
 build.
 
-What's here:
+### Milestone 1 — Foundation & Auth
 - Project structure generated from `project.yml` via [XcodeGen](https://github.com/yonaskolb/XcodeGen)
   (no hand-authored `.xcodeproj` — see "Getting started" below).
 - Firebase Auth (Sign in with Apple + email/password), App Check (App Attest /
@@ -22,17 +22,32 @@ What's here:
 - Firestore security rules (`firestore.rules`) and Storage rules
   (`storage.rules`) covering the full data model in §6, including the
   server-write-only `isPremium`/`billingIssue` fields and bidirectional block
-  enforcement — written ahead of the milestones that use them (pets, swipes,
-  matches, chat) since the rules are cheap to get right early and expensive to
-  retrofit.
+  enforcement — written ahead of the milestones that use them since the rules
+  are cheap to get right early and expensive to retrofit.
 - `CloudFunctions/` TypeScript project skeleton (builds, no functions
   implemented yet — those land in Milestones 4–5).
-- Unit tests for `AuthViewModel` against protocol-mocked services (no live
-  Firebase calls).
 
-Not started: pet profiles, swipe deck, matching, chat, monetization, ads,
-report/block, delete account, App Store assets, Fastlane. Follow `CLAUDE.md`
-§12 for the milestone order.
+### Milestone 2 — Pet Profiles
+- Multi-step profile creation (basics → photos → purpose → location) in
+  `PetProfileSetupView`, driven by `PetProfileViewModel`.
+- Photo picking via `PHPickerViewController` (no library permission needed,
+  §10.4), client-side downscale + JPEG compression (`ImageProcessor`, §10.3),
+  upload to Storage at `petPhotos/{ownerId}/{petId}/...`.
+- Location permission with an in-app priming step before the OS prompt (§9),
+  geohash computed on save via `GeoFireUtils` (§6.1).
+- Reusable `PetCardView` (deck/match/detail, §9) and `PermissionPrimingView`.
+- Edit / delete own pet; deleting also cleans up its Storage photos.
+- Routing: a signed-in, age-confirmed user with 0 pets is sent to profile
+  setup; with ≥1 pet they land on "My Pets" (temporary main surface until the
+  tab bar arrives in Milestone 3).
+- Unit tests for `AuthViewModel`, `PetProfileViewModel`, and `HomeViewModel`
+  against protocol-mocked services (no live Firebase calls).
+
+Not started: swipe deck, matching, chat, monetization, ads, report/block,
+delete account, App Store assets, Fastlane. Follow `CLAUDE.md` §12 for order.
+
+> Note: the "add a second pet is Plus-gated" path currently shows a placeholder
+> note instead of a paywall — the real paywall is built in Milestone 5.
 
 ## Getting started (on a Mac)
 
